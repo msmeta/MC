@@ -1,0 +1,31 @@
+% uppg 2
+
+r=0.019;
+T=6;
+sigma=0.25;
+K=100;
+S0=100;
+
+N=1000;
+
+h=@(x) max(S0*exp((r-(1/2)*sigma^2)+sqrt(T)*sigma*x)-K,0);
+f=@(x) (1/sqrt(2*pi))*exp(-(1/2)*x^2);
+
+exact=blsprice(100,100,r,T,sigma);
+
+Z=randn(N,1);
+crude_mc=max(S0*exp((r-(1/2)*sigma^2)+sqrt(T)*sigma*Z)-K,0);
+
+crude_alpha_tilde=mean(crude_mc);
+var_crude=var(crude_mc);
+
+g=@(x) 1/crude_alpha_tilde;
+
+importance_mc=[];
+importance_estimator = @(x) h(x)*f(x)/g(x);
+for i=1:N
+Z2=rand*crude_alpha_tilde+K-crude_alpha_tilde/2;
+importance_mc=[importance_mc, importance_estimator(Z2)];
+end
+importance_alpha_tilde=mean(importance_mc);
+var_importance=var(importance_mc);
