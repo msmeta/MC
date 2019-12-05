@@ -52,7 +52,8 @@ for i=1:k+1
     N=[N;numel(Stemp)];
 end
 
-put_price_poststrat = sum(p.*S./N)
+% vanliga estimatorn fast undvik termer där N=0
+put_price_poststrat = sum(p(N>0).*S(N>0)./N(N>0))
 % konfidensintervall föreläsning 11
 
 function d = dval(b,S0,r,sigma,T)
