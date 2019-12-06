@@ -29,10 +29,12 @@ end
 
 % put prices at time 0
 put_prices_0 = put_0(call_prices_T2);
+put_price_crude = mean(put_prices_0)
+var_crude = var(put_prices_0)
 
 %%
 S_T = @(S0,T,Z) S0*exp((r-sigma^2/2)*T+sqrt(T)*sigma*Z);
-k=30;
+k=100;
 b=linspace(S_T(S0,T2,-2),S_T(S0,T2,+2),k)';
 dvec=dval(b,S0,r,sigma,T2);
 probs=normcdf(dvec);
@@ -40,6 +42,7 @@ p=[probs(1);probs(2:end)-probs(1:end-1);1-probs(end)];
 
 S=[];
 N=[];
+sigmas=[];
 for i=1:k+1
     if(i==1)
         Stemp=put_prices_0(S_T2 < b(i));
@@ -48,6 +51,7 @@ for i=1:k+1
     else
         Stemp=put_prices_0(b(i-1)<S_T2 & S_T2 < b(i));
     end
+    sigmas=[sigmas;var(Stemp)];
     S=[S;sum(Stemp)];
     N=[N;numel(Stemp)];
 end
@@ -55,6 +59,9 @@ end
 % vanliga estimatorn fast undvik termer där N=0
 put_price_poststrat = sum(p(N>0).*S(N>0)./N(N>0))
 % konfidensintervall föreläsning 11
+% dubbelkolla variansen, detta är skattningar av sigma^2_i
+% undviker NAN i sigmas med index
+var_poststrat = sum(sigmas(sigmas>0).*p(sigmas>0))
 
 function d = dval(b,S0,r,sigma,T)
 d=(log(b/S0)-(r-sigma^2/2)*T)/(sqrt(T)*sigma);
