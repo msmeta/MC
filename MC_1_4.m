@@ -32,10 +32,13 @@ put_prices_0 = put_0(call_prices_T2);
 put_price_crude = mean(put_prices_0)
 var_crude = var(put_prices_0)
 
+approx_RE=approx_RE(sqrt(var_crude),N1,put_price_crude);
+CI_crude = [put_price_crude-1.96*sqrt(var_crude)/sqrt(N1),put_price_crude+1.96*sqrt(var_crude)/sqrt(N1)]
+CI2 = [quantile(put_prices_0,0.025),quantile(put_prices_0,0.975)]
 %%
 S_T = @(S0,T,Z) S0*exp((r-sigma^2/2)*T+sqrt(T)*sigma*Z);
-k=100;
-b=linspace(S_T(S0,T2,-2),S_T(S0,T2,+2),k)';
+k=30;
+b=linspace(S_T(S0,T2,-2),S_T(S0,T2,2),k)';
 dvec=dval(b,S0,r,sigma,T2);
 probs=normcdf(dvec);
 p=[probs(1);probs(2:end)-probs(1:end-1);1-probs(end)];
@@ -56,10 +59,10 @@ for i=1:k+1
     N=[N;numel(Stemp)];
 end
 
-% vanliga estimatorn fast undvik termer där N=0
+% vanliga estimatorn fast undvik termer dÃ¤r N=0
 put_price_poststrat = sum(p(N>0).*S(N>0)./N(N>0))
-% konfidensintervall föreläsning 11
-% dubbelkolla variansen, detta är skattningar av sigma^2_i
+% konfidensintervall fÃ¶relÃ¤sning 11
+% dubbelkolla variansen, detta Ã¤r skattningar av sigma^2_i
 % undviker NAN i sigmas med index
 var_poststrat = sum(sigmas(sigmas>0).*p(sigmas>0))
 
